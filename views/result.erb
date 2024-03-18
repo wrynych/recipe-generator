@@ -6,5 +6,16 @@
 <body>
   <h1>Password Generated</h1>
   <p>Your generated password is: <%= @password %></p>
+  <form action="/" method="get">
+    <input type="submit" value="Go back">
+  </form>
+  <form action="/generate" method="post">
+    <input type="hidden" name="length" value="<%= @length %>">
+    <input type="hidden" name="lower_case" value="<%= @include_lower_case ? 'on' : 'off' %>">
+    <input type="hidden" name="upper_case" value="<%= @include_upper_case ? 'on' : 'off' %>">
+    <input type="hidden" name="numbers" value="<%= @include_numbers ? 'on' : 'off' %>">
+    <input type="hidden" name="special" value="<%= @include_special_characters ? 'on' : 'off' %>">
+    <input type="submit" value="Refresh for another password">
+  </form>
 </body>
 </html>
