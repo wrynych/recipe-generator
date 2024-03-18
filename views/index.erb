@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Password Generator</title>
+</head>
+<body>
+  <h1>Password Generator</h1>
+  <form action="/generate" method="post">
+    <label for="length">Length:</label>
+    <input type="number" id="length" name="length" min="1" max="50" value="10"><br>
+    <input type="checkbox" id="lower_case" name="lower_case">
+    <label for="lower_case">Include lower case</label><br>
+    <input type="checkbox" id="upper_case" name="upper_case">
+    <label for="upper_case">Include upper case</label><br>
+    <input type="checkbox" id="numbers" name="numbers">
+    <label for="numbers">Include numbers</label><br>
+    <input type="checkbox" id="special" name="special">
+    <label for="special">Include special characters</label><br>
+    <input type="submit" value="Generate Password">
+  </form>
+</body>
+</html>
