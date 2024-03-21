@@ -1,20 +1,46 @@
-require "sinatra"
-require "sinatra/reloader"
+require 'sinatra'
 require 'securerandom'
+require 'net/http'
+require 'json'
 
-# Генерируем случайный пароль
-def generate_password(length, include_lower_case, include_upper_case, include_numbers, include_special_characters)
-  characters = []
-  characters += ('a'..'z').to_a if include_lower_case || (!include_lower_case && !include_upper_case && !include_numbers && !include_special_characters)
-  characters += ('A'..'Z').to_a if include_upper_case || (!include_lower_case && !include_upper_case && !include_numbers && !include_special_characters)
-  characters += (0..9).to_a if include_numbers || (!include_lower_case && !include_upper_case && !include_numbers && !include_special_characters)
-  characters += %w(! @ # $ % ^ & *) if include_special_characters || (!include_lower_case && !include_upper_case && !include_numbers && !include_special_characters)
+api_key = ENV['UNIQUE_PASS_KEY']
+random_org_api_url = 'https://api.random.org/json-rpc/2/invoke'
 
-  password = ''
-  length.times { password += characters.sample.to_s }
-  password
+def generate_password(length, include_lower_case, include_upper_case, include_numbers, include_special_characters, api_key)
+  request_payload = {
+    jsonrpc: '2.0',
+    method: 'generateIntegers',
+    params: {
+      apiKey: api_key,
+      n: length,
+      min: 33,  
+      max: 126, 
+      replacement: true,
+      base: 10
+    },
+    id: 1
+  }
+
+  uri = URI(random_org_api_url)
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(uri)
+  request['Content-Type'] = 'application/json'
+  request.body = request_payload.to_json
+
+  response = http.request(request)
+
+  if response.is_a?(Net::HTTPSuccess)
+    password = ''
+    JSON.parse(response.body)['result']['random']['data'].each do |ascii_value|
+      password += ascii_value.chr
+    end
+    password
+  else
+    'Failed to generate password'
+  end
 end
-
 
 get '/' do
   erb :index
@@ -34,6 +60,6 @@ post '/generate' do
     @include_special_characters = true
   end
 
-  @password = generate_password(@length, @include_lower_case, @include_upper_case, @include_numbers, @include_special_characters)
+  @password = generate_password(@length, @include_lower_case, @include_upper_case, @include_numbers, @include_special_characters, api_key)
   erb :result
 end

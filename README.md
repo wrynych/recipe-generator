@@ -1,18 +1,11 @@
-# sinatra-template
+# Password Generator Web Application
 
-Use this repository to create new Sinatra apps. 
+This is a simple web application built with Sinatra that generates random passwords based on user-specified criteria. It utilizes an external password generation service's API for password generation.
 
-Optionally, to use `ActiveRecord` for database operations, add to the `app.rb`:
+## Features
 
-```ruby
-require "sinatra/activerecord"
-```
+- Allows users to specify password length.
+- Provides options to include lower case, upper case, numbers, and special characters in the generated password.
+- Offers a basic mode that includes all types of characters by default.
+- Utilizes an API key for authentication with the external password generation service.
 
-And in the `config/environment.rb` file add this code block:
-
-```ruby
-configure do
-  # setup a database connection
-  set(:database, { adapter: "sqlite3", database: "db/development.sqlite3" })
-end
-```
