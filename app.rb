@@ -1,65 +1,37 @@
 require 'sinatra'
-require 'securerandom'
-require 'net/http'
+require 'sinatra/reloader' if development?
+require 'httparty'
 require 'json'
 
-api_key = ENV['UNIQUE_PASS_KEY']
-random_org_api_url = 'https://api.random.org/json-rpc/2/invoke'
+# Load API key from environment variables or GitHub secrets
+RECIPE_API_KEY = ENV['RECIPE_KEY']
 
-def generate_password(length, include_lower_case, include_upper_case, include_numbers, include_special_characters, api_key)
-  request_payload = {
-    jsonrpc: '2.0',
-    method: 'generateIntegers',
-    params: {
-      apiKey: api_key,
-      n: length,
-      min: 33,  
-      max: 126, 
-      replacement: true,
-      base: 10
-    },
-    id: 1
-  }
-
-  uri = URI(random_org_api_url)
-  http = Net::HTTP.new(uri.host, uri.port)
-  http.use_ssl = true
-
-  request = Net::HTTP::Post.new(uri)
-  request['Content-Type'] = 'application/json'
-  request.body = request_payload.to_json
-
-  response = http.request(request)
-
-  if response.is_a?(Net::HTTPSuccess)
-    password = ''
-    JSON.parse(response.body)['result']['random']['data'].each do |ascii_value|
-      password += ascii_value.chr
-    end
-    password
-  else
-    'Failed to generate password'
-  end
-end
-
+# Set up the root route
 get '/' do
   erb :index
 end
 
-post '/generate' do
-  @length = params[:length].to_i
-  @include_lower_case = params[:lower_case] == 'on'
-  @include_upper_case = params[:upper_case] == 'on'
-  @include_numbers = params[:numbers] == 'on'
-  @include_special_characters = params[:special] == 'on'
-
-  if params[:basic]
-    @include_lower_case = true
-    @include_upper_case = true
-    @include_numbers = true
-    @include_special_characters = true
+post '/search' do
+  # Get form inputs (code omitted for brevity)
+  
+  # Make a request to the Spoonacular API to search for recipes
+  response = HTTParty.get("https://api.spoonacular.com/recipes/complexSearch", query: query_params)
+  
+  # Debug: Output the response to console
+  puts response.inspect
+  
+  # Parse the JSON response
+  data = JSON.parse(response.body)
+  
+  # Debug: Output the parsed JSON data to console
+  puts data.inspect
+  
+  # Extract relevant information from the response
+  if data['results']
+    @recipes = data['results']
+    erb :results  # Render the results template
+  else
+    @error = data['message']
+    erb :error  # Render an error template
   end
-
-  @password = generate_password(@length, @include_lower_case, @include_upper_case, @include_numbers, @include_special_characters, api_key)
-  erb :result
 end

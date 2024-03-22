@@ -1,21 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Password Generated</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Results</title>
 </head>
 <body>
-  <h1>Password Generated</h1>
-  <p>Your generated password is: <%= @password %></p>
-  <form action="/" method="get">
-    <input type="submit" value="Go back">
-  </form>
-  <form action="/generate" method="post">
-    <input type="hidden" name="length" value="<%= @length %>">
-    <input type="hidden" name="lower_case" value="<%= @include_lower_case ? 'on' : 'off' %>">
-    <input type="hidden" name="upper_case" value="<%= @include_upper_case ? 'on' : 'off' %>">
-    <input type="hidden" name="numbers" value="<%= @include_numbers ? 'on' : 'off' %>">
-    <input type="hidden" name="special" value="<%= @include_special_characters ? 'on' : 'off' %>">
-    <input type="submit" value="Refresh for another password">
-  </form>
+  <h1>Search Results</h1>
+  
+  <% if @error %>
+    <p><%= @error %></p>
+  <% else %>
+    <% @recipes.each do |recipe| %>
+      <div>
+        <h2><%= recipe['title'] %></h2>
+        <p><strong>Ready in:</strong> <%= recipe['readyInMinutes'] %> minutes</p>
+        <p><strong>Servings:</strong> <%= recipe['servings'] %></p>
+        <% if recipe['image'] %>
+          <img src="<%= recipe['image'] %>" alt="<%= recipe['title'] %>">
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
 </body>
 </html>
